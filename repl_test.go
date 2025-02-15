@@ -2,6 +2,8 @@ package main
 
 import (
 	"testing"
+
+	"github.com/Pizzu/pokedexcli/common"
 )
 
 func TestCleanInput(t *testing.T) {
@@ -16,7 +18,7 @@ func TestCleanInput(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		actual := cleanInput(c.input)
+		actual := common.CleanInput(c.input)
 
 		if len(c.expected) != len(actual) {
 			t.Errorf("Slices are different! \n Expected: %v \n Received: %v", len(c.expected), len(actual))

@@ -1,37 +1,41 @@
 package main
 
 import (
-	"strings"
+	"bufio"
+	"fmt"
+	"os"
+
+	"github.com/Pizzu/pokedexcli/common"
 )
 
 func main() {
-	startRepl()
-}
+	baseUrl := "https://pokeapi.co/api/v2/location-area?limit=20"
+	config := &config{Next: &baseUrl, Previous: nil}
+	scanner := bufio.NewScanner(os.Stdin)
+	for {
+		fmt.Print("Pokedex > ")
+		scanner.Scan()
 
-func cleanInput(text string) []string {
-	trimmedText := strings.TrimSpace(text)
-	lowerCaseText := strings.ToLower(trimmedText)
-	splittedSlice := strings.Split(lowerCaseText, " ")
-	return splittedSlice
-}
+		words := common.CleanInput(scanner.Text())
 
-type cliCommand struct {
-	name        string
-	description string
-	callback    func() error
-}
+		if len(words) == 0 {
+			continue
+		}
 
-func getCommands() map[string]cliCommand {
-	return map[string]cliCommand{
-		"help": {
-			name:        "help",
-			description: "Displays a help message",
-			callback:    commandHelp,
-		},
-		"exit": {
-			name:        "exit",
-			description: "Exit the Pokedex",
-			callback:    commandExit,
-		},
+		commandName := words[0]
+
+		command, exists := getCommands()[commandName]
+
+		if exists {
+			err := command.callback(config)
+
+			if err != nil {
+				fmt.Println(err)
+			}
+			continue
+		} else {
+			fmt.Println("Unknown command")
+			continue
+		}
 	}
 }
