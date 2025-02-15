@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Pizzu/pokedexcli/api"
+	"github.com/Pizzu/pokedexcli/internal/pokeapi"
 )
 
 type config struct {
-	Next     *string
-	Previous *string
+	pokeapiClient pokeapi.Client
+	Next          *string
+	Previous      *string
 }
 
 type cliCommand struct {
@@ -62,8 +63,9 @@ func commandExit(config *config) error {
 }
 
 func commandMap(config *config) error {
+	fmt.Printf("%p\n", config.Next)
 	if config.Next != nil {
-		locationDTO, err := api.GetAllLocationArea(*config.Next)
+		locationDTO, err := config.pokeapiClient.ListLocations(config.Next)
 
 		if err != nil {
 			return err
@@ -84,7 +86,7 @@ func commandMap(config *config) error {
 
 func commandMapBack(config *config) error {
 	if config.Previous != nil {
-		locationDTO, err := api.GetAllLocationArea(*config.Previous)
+		locationDTO, err := config.pokeapiClient.ListLocations(config.Previous)
 
 		if err != nil {
 			return err

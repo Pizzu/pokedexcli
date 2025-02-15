@@ -1,12 +1,25 @@
-package api
+package pokeapi
 
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
-func GetAllLocationArea(url string) (LocationDTO, error) {
-	req, err := http.NewRequest("GET", url, nil)
+type Client struct {
+	httpClient http.Client
+}
+
+func NewClient(timeout time.Duration) Client {
+	return Client{
+		httpClient: http.Client{
+			Timeout: timeout,
+		},
+	}
+}
+
+func (c *Client) ListLocations(pageURL *string) (LocationDTO, error) {
+	req, err := http.NewRequest("GET", *pageURL, nil)
 
 	if err != nil {
 		return LocationDTO{}, err

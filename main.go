@@ -4,13 +4,17 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/Pizzu/pokedexcli/common"
+	"github.com/Pizzu/pokedexcli/internal/pokeapi"
 )
 
 func main() {
 	baseUrl := "https://pokeapi.co/api/v2/location-area?limit=20"
-	config := &config{Next: &baseUrl, Previous: nil}
+	pokeClient := pokeapi.NewClient(5 * time.Second)
+	config := &config{pokeapiClient: pokeClient, Next: &baseUrl}
+
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("Pokedex > ")
@@ -34,6 +38,7 @@ func main() {
 			}
 			continue
 		} else {
+			fmt.Println(baseUrl)
 			fmt.Println("Unknown command")
 			continue
 		}

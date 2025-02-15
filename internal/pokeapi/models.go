@@ -1,4 +1,4 @@
-package api
+package pokeapi
 
 type LocationDTO struct {
 	Count    int     `json:"count"`
