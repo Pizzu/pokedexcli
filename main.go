@@ -1,28 +1,11 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
 	"strings"
 )
 
 func main() {
-	scanner := bufio.NewScanner(os.Stdin)
-	for {
-		fmt.Print("Pokedex > ")
-		scanner.Scan()
-
-		words := cleanInput(scanner.Text())
-
-		if len(words) == 0 {
-			continue
-		}
-
-		commandName := words[0]
-
-		fmt.Printf("Your command was: %s \n", commandName)
-	}
+	startRepl()
 }
 
 func cleanInput(text string) []string {
@@ -30,4 +13,25 @@ func cleanInput(text string) []string {
 	lowerCaseText := strings.ToLower(trimmedText)
 	splittedSlice := strings.Split(lowerCaseText, " ")
 	return splittedSlice
+}
+
+type cliCommand struct {
+	name        string
+	description string
+	callback    func() error
+}
+
+func getCommands() map[string]cliCommand {
+	return map[string]cliCommand{
+		"help": {
+			name:        "help",
+			description: "Displays a help message",
+			callback:    commandHelp,
+		},
+		"exit": {
+			name:        "exit",
+			description: "Exit the Pokedex",
+			callback:    commandExit,
+		},
+	}
 }
