@@ -63,7 +63,6 @@ func commandExit(config *config) error {
 }
 
 func commandMap(config *config) error {
-	fmt.Printf("%p\n", config.Next)
 	if config.Next != nil {
 		locationDTO, err := config.pokeapiClient.ListLocations(config.Next)
 
