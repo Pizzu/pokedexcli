@@ -28,10 +28,16 @@ func main() {
 
 		commandName := words[0]
 
+		var args []string
+
+		if len(words) > 1 {
+			args = words[1:]
+		}
+
 		command, exists := getCommands()[commandName]
 
 		if exists {
-			err := command.callback(config)
+			err := command.callback(config, args...)
 
 			if err != nil {
 				fmt.Println(err)

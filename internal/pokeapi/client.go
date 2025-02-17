@@ -31,7 +31,7 @@ func (c *Client) ListLocations(pageURL *string) (LocationDTO, error) {
 		err := json.Unmarshal(rawData, &locationDTO)
 
 		if err != nil {
-			return locationDTO, err
+			return LocationDTO{}, err
 		}
 
 		return locationDTO, nil
@@ -59,14 +59,12 @@ func (c *Client) ListLocations(pageURL *string) (LocationDTO, error) {
 		// Save url and res to cache
 		rawData, err := io.ReadAll(res.Body)
 
-		
 		if err != nil {
 			return LocationDTO{}, err
 		}
 
-		
 		err = json.Unmarshal(rawData, &locationDTO)
-		
+
 		if err != nil {
 			return locationDTO, err
 		}
@@ -75,4 +73,56 @@ func (c *Client) ListLocations(pageURL *string) (LocationDTO, error) {
 
 		return locationDTO, nil
 	}
+}
+
+func (c *Client) ListPokemonsWithinLocation(locationArea string) (PokemonLocationDTO, error) {
+	var pokemonLocationDTO PokemonLocationDTO
+	baseUrl := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%s?limit=20", locationArea)
+
+	if rawData, ok := c.cache.Get(baseUrl); ok {
+		err := json.Unmarshal(rawData, &pokemonLocationDTO)
+
+		if err != nil {
+			return PokemonLocationDTO{}, err
+		}
+
+		return pokemonLocationDTO, nil
+	}
+
+	req, err := http.NewRequest("GET", baseUrl, nil)
+
+	if err != nil {
+		return PokemonLocationDTO{}, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := c.httpClient.Do(req)
+
+	if err != nil {
+		return PokemonLocationDTO{}, err
+	}
+
+	if res == nil || res.StatusCode != http.StatusOK {
+		return PokemonLocationDTO{}, fmt.Errorf("non-OK HTTP status: %s", res.Status)
+	}
+
+	defer res.Body.Close()
+
+	// Save url and res to cache
+	rawData, err := io.ReadAll(res.Body)
+
+	if err != nil {
+		return PokemonLocationDTO{}, err
+	}
+
+	err = json.Unmarshal(rawData, &pokemonLocationDTO)
+
+	if err != nil {
+		return PokemonLocationDTO{}, err
+	}
+
+	c.cache.Add(baseUrl, rawData)
+
+	return pokemonLocationDTO, nil
 }

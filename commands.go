@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -16,7 +17,7 @@ type config struct {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, ...string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -41,10 +42,15 @@ func getCommands() map[string]cliCommand {
 			description: "Display the previous 20 locations",
 			callback:    commandMapBack,
 		},
+		"explore": {
+			name:        "explore",
+			description: "list of all pokemon located in a specific location",
+			callback:    commandExplore,
+		},
 	}
 }
 
-func commandHelp(config *config) error {
+func commandHelp(config *config, arg ...string) error {
 	fmt.Println()
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage:")
@@ -56,13 +62,13 @@ func commandHelp(config *config) error {
 	return nil
 }
 
-func commandExit(config *config) error {
+func commandExit(config *config, arg ...string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandMap(config *config) error {
+func commandMap(config *config, arg ...string) error {
 	if config.Next != nil {
 		locationDTO, err := config.pokeapiClient.ListLocations(config.Next)
 
@@ -83,7 +89,7 @@ func commandMap(config *config) error {
 	return nil
 }
 
-func commandMapBack(config *config) error {
+func commandMapBack(config *config, arg ...string) error {
 	if config.Previous != nil {
 		locationDTO, err := config.pokeapiClient.ListLocations(config.Previous)
 
@@ -100,6 +106,26 @@ func commandMapBack(config *config) error {
 
 	} else {
 		fmt.Println("you're on the first page")
+	}
+
+	return nil
+}
+
+func commandExplore(config *config, args ...string) error {
+	if args == nil {
+		return errors.New("please provide a location area")
+	}
+
+	pokemonLocationDTO, err := config.pokeapiClient.ListPokemonsWithinLocation(args[0])
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Exploring %s...\n", args[0])
+	for _, data := range pokemonLocationDTO.PokemonEncounters {
+		pokemonName := data.Pokemon.Name
+		fmt.Printf("- %s\n", pokemonName)
 	}
 
 	return nil
