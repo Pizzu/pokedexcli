@@ -1,10 +1,14 @@
 package pokedex
 
-import "github.com/Pizzu/pokedexcli/internal/pokeapi"
+import (
+	"errors"
+
+	"github.com/Pizzu/pokedexcli/internal/pokeapi"
+)
 
 type PokemonStore interface {
 	Add(pokemon pokeapi.PokemonDTO) error
-	Exists(name string) (bool, error)
+	GetPokemon(name string) (pokeapi.PokemonDTO, error)
 	GetAll() ([]pokeapi.PokemonDTO, error)
 }
 
@@ -21,10 +25,12 @@ func (ms *MapStore) Add(pokemon pokeapi.PokemonDTO) error {
 	return nil
 }
 
-func (ms *MapStore) Exists(name string) (bool, error) {
-	_, isPresent := ms.pokedex[name]
+func (ms *MapStore) GetPokemon(name string) (pokeapi.PokemonDTO, error) {
+	if pokemon, ok := ms.pokedex[name]; ok {
+		return pokemon, nil
+	}
 
-	return isPresent, nil
+	return pokeapi.PokemonDTO{}, errors.New("you have not caught that pokemon")
 }
 
 func (ms *MapStore) GetAll() ([]pokeapi.PokemonDTO, error) {

@@ -55,6 +55,11 @@ func getCommands() map[string]cliCommand {
 			description: "try to catch a pokemon e.g. catch charizard",
 			callback:    commandCatch,
 		},
+		"inspect": {
+			name:        "inspect",
+			description: "get more info about a specific captured pokemon",
+			callback:    commandInspect,
+		},
 	}
 }
 
@@ -164,6 +169,30 @@ func commandCatch(config *config, args ...string) error {
 		fmt.Printf("%s was caught!\n", pokemonDTO.Name)
 	} else {
 		fmt.Printf("%s escaped!\n", pokemonDTO.Name)
+	}
+
+	return nil
+}
+
+func commandInspect(config *config, args ...string) error {
+	if args == nil {
+		return errors.New("please provide a pokemon name")
+	}
+
+	pokemonDTO, err := config.pokedex.GetPokemon(args[0])
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Name: %s\n", pokemonDTO.Name)
+	fmt.Printf("Height: %v\n", pokemonDTO.Height)
+	fmt.Printf("Weight: %v\n", pokemonDTO.Weight)
+
+	fmt.Println("Types:")
+
+	for _, value := range pokemonDTO.Types {
+		fmt.Printf(" - %s\n", value.Type.Name)
 	}
 
 	return nil

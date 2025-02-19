@@ -42,7 +42,7 @@ func main() {
 			err := command.callback(config, args...)
 
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println(err.Error())
 			}
 			continue
 		} else {
