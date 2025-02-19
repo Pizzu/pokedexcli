@@ -60,6 +60,11 @@ func getCommands() map[string]cliCommand {
 			description: "get more info about a specific captured pokemon",
 			callback:    commandInspect,
 		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "show all captured pokemons",
+			callback:    commandPokedex,
+		},
 	}
 }
 
@@ -193,6 +198,22 @@ func commandInspect(config *config, args ...string) error {
 
 	for _, value := range pokemonDTO.Types {
 		fmt.Printf(" - %s\n", value.Type.Name)
+	}
+
+	return nil
+}
+
+func commandPokedex(config *config, args ...string) error {
+	allPokemons, err := config.pokedex.GetAll()
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Your Pokedex:")
+
+	for _, pokemon := range allPokemons {
+		fmt.Printf(" - %s\n", pokemon.Name)
 	}
 
 	return nil
