@@ -8,12 +8,14 @@ import (
 
 	"github.com/Pizzu/pokedexcli/common"
 	"github.com/Pizzu/pokedexcli/internal/pokeapi"
+	"github.com/Pizzu/pokedexcli/internal/pokedex"
 )
 
 func main() {
 	baseUrl := "https://pokeapi.co/api/v2/location-area?limit=20"
 	pokeClient := pokeapi.NewClient(5 * time.Second)
-	config := &config{pokeapiClient: pokeClient, Next: &baseUrl}
+	pokeStorage := pokedex.NewMapStore()
+	config := &config{pokeapiClient: pokeClient, pokedex: pokeStorage, Next: &baseUrl}
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for {

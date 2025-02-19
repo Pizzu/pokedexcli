@@ -24,3 +24,20 @@ type PokemonLocationDTO struct {
 		} `json:"pokemon"`
 	} `json:"pokemon_encounters"`
 }
+
+type PokemonDTO struct {
+	BaseExperience int    `json:"base_experience"`
+	Height         int    `json:"height"`
+	Name           string `json:"name"`
+	Species        struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"species"`
+	Types []struct {
+		Type struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"type"`
+	} `json:"types"`
+	Weight int `json:"weight"`
+}

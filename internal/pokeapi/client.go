@@ -126,3 +126,55 @@ func (c *Client) ListPokemonsWithinLocation(locationArea string) (PokemonLocatio
 
 	return pokemonLocationDTO, nil
 }
+
+func (c *Client) GetPokemon(name string) (PokemonDTO, error) {
+	var pokemon PokemonDTO
+	baseUrl := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%s", name)
+
+	if rawData, ok := c.cache.Get(baseUrl); ok {
+		err := json.Unmarshal(rawData, &pokemon)
+
+		if err != nil {
+			return PokemonDTO{}, err
+		}
+
+		return pokemon, nil
+	}
+
+	req, err := http.NewRequest("GET", baseUrl, nil)
+
+	if err != nil {
+		return PokemonDTO{}, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := c.httpClient.Do(req)
+
+	if err != nil {
+		return PokemonDTO{}, err
+	}
+
+	if res == nil || res.StatusCode != http.StatusOK {
+		return PokemonDTO{}, fmt.Errorf("non-OK HTTP status: %s", res.Status)
+	}
+
+	defer res.Body.Close()
+
+	// Save url and res to cache
+	rawData, err := io.ReadAll(res.Body)
+
+	if err != nil {
+		return PokemonDTO{}, err
+	}
+
+	err = json.Unmarshal(rawData, &pokemon)
+
+	if err != nil {
+		return PokemonDTO{}, err
+	}
+
+	c.cache.Add(baseUrl, rawData)
+
+	return pokemon, nil
+}

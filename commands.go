@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Pizzu/pokedexcli/common"
 	"github.com/Pizzu/pokedexcli/internal/pokeapi"
+	"github.com/Pizzu/pokedexcli/internal/pokedex"
 )
 
 type config struct {
 	pokeapiClient pokeapi.Client
+	pokedex       pokedex.PokemonStore
 	Next          *string
 	Previous      *string
 }
@@ -46,6 +49,11 @@ func getCommands() map[string]cliCommand {
 			name:        "explore",
 			description: "list of all pokemon located in a specific location",
 			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "try to catch a pokemon e.g. catch charizard",
+			callback:    commandCatch,
 		},
 	}
 }
@@ -126,6 +134,36 @@ func commandExplore(config *config, args ...string) error {
 	for _, data := range pokemonLocationDTO.PokemonEncounters {
 		pokemonName := data.Pokemon.Name
 		fmt.Printf("- %s\n", pokemonName)
+	}
+
+	return nil
+}
+
+func commandCatch(config *config, args ...string) error {
+	if args == nil {
+		return errors.New("please provide a pokemon name")
+	}
+
+	pokemonDTO, err := config.pokeapiClient.GetPokemon(args[0])
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Throwing a Pokeball at %v...\n", pokemonDTO.Name)
+
+	isCatched := common.AttempCatch(pokemonDTO.BaseExperience)
+
+	if isCatched {
+		err = config.pokedex.Add(pokemonDTO)
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("%s was caught!\n", pokemonDTO.Name)
+	} else {
+		fmt.Printf("%s escaped!\n", pokemonDTO.Name)
 	}
 
 	return nil
